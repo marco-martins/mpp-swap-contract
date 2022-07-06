@@ -1,7 +1,5 @@
 # Marlowe Pioneers
 
----
-
 Small tutorial showing how to create and execute a Marlowe smart contract using marlow-cli through the Linux shell.
 The contract consists of two parties (Party1 and Party2) where each one deposit a specific amount of ADA and then the contract swaps the amounts.
 All the steps were executed with a fresh installation with Ubuntu 20.04.4 LTS.
