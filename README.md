@@ -59,20 +59,14 @@ mkdir -p wallets/wallet1
 cd wallets/wallet1
 ```
 
-Generate the seed phrase and convert it into a root private key `wallet.prv`
-
 ```bash
+# Generate the seed phrase and convert it into a root private key `wallet.prv`
 cardano-wallet recovery-phrase generate --size 15 \
 | tee wallet.seed \
 | cardano-wallet key from-recovery-phrase Shelley \
 | cardano-wallet key child 1852H/1815H/0H/0/0 > wallet.prv
-```
 
-**_Note_** The `tee` command sends the stdout to a file and display the content to the pipe to be exposed to the next command.
-
-Generate the wallet files from the wallet.priv file previews generated.
-
-```bash
+# Generate the wallet files from the wallet.priv file previews generated
 cardano-cli key convert-cardano-address-key --shelley-payment-key --signing-key-file wallet.prv --out-file payment.skey
 cardano-cli key verification-key --signing-key-file payment.skey --verification-key-file payment.vkey
 cardano-cli address build --testnet-magic 1567 --payment-verification-key-file payment.vkey > payment.addr
@@ -85,7 +79,7 @@ cardano-cli address build --testnet-magic 1567 --payment-verification-key-file p
 ```bash
 marlowe-cli util faucet \
 --testnet-magic $CARDANO_TESTNET_MAGIC \
---lovelace 2500000000 \
+--lovelace 2000000000 \
 --out-file /dev/null \
 --submit 600 $(cat ~/marlowe-cardano/wallets/wallet1/payment.addr)
 ```
@@ -109,7 +103,7 @@ MILLISECOND=1000
 NOW=$(($(date -u +%s)*MILLISECOND))  # The current time in POSIX milliseconds.
 HOUR=$((60*60*MILLISECOND))          # One hour, in POSIX milliseconds.
 DEADLINE=$((NOW+10*HOUR))            # Timeout deadline, ten hours from now.
-MINIMUM_ADA=3000000
+MINIMUM_ADA=2000000
 
 PARTY_1=Party1
 PARTY_2=Party2
@@ -183,7 +177,7 @@ marlowe-cli transaction simple \
 ```bash
 # Do not run
 marlowe-cli template simple \
---minimum-ada "3000000" \
+--minimum-ada "$MINIMUM_ADA" \
 --bystander "Role=$PARTY_2" \
 --party "Role=$PARTY_1" \
 --deposit-lovelace "$PARTY_2_AMOUNT" \
@@ -228,12 +222,12 @@ cat > contract.json << EOI
                   }
                 },
                 "then": "close",
-                "pay": $PARTY_1_AMOUNT,
+                "pay": $PARTY_2_AMOUNT,
                 "from_account": {
                   "role_token": $PARTY_2
                 }
               },
-              "pay": $PARTY_2_AMOUNT,
+              "pay": $PARTY_1_AMOUNT,
               "from_account": {
                 "role_token": $PARTY_1
               }
@@ -249,7 +243,7 @@ cat > contract.json << EOI
               "into_account": {
                 "role_token": $PARTY_2
               },
-              "deposits": $PARTY_1_AMOUNT
+              "deposits": $PARTY_2_AMOUNT
             }
           }
         ],
@@ -267,7 +261,7 @@ cat > contract.json << EOI
         "into_account": {
           "role_token": $PARTY_1
         },
-        "deposits": $PARTY_2_AMOUNT
+        "deposits": $PARTY_1_AMOUNT
       }
     }
   ],
@@ -313,7 +307,9 @@ marlowe-cli run initialize \
 cardano-cli query utxo \
 --address $(cat ~/marlowe-cardano/wallets/wallet1/payment.addr) \
 --testnet-magic $CARDANO_TESTNET_MAGIC
+```
 
+```bash
 # tx-in TX_PARTY_1_ADA
 
 marlowe-cli run execute \
@@ -325,7 +321,9 @@ marlowe-cli run execute \
 --out-file /dev/null \
 --print-stats \
 --submit 600
+```
 
+```bash
 jq '.contract' tx1.marlowe | yq -y
 CONTRACT_ADDRESS=$(jq -r '.marloweValidator.address' tx1.marlowe)
 cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
@@ -338,7 +336,7 @@ marlowe-cli run prepare \
 --marlowe-file tx1.marlowe \
 --deposit-account "Role=$PARTY_1" \
 --deposit-party "Role=$PARTY_1" \
---deposit-amount "$PARTY_2_AMOUNT" \
+--deposit-amount "$PARTY_1_AMOUNT" \
 --invalid-before "$NOW" \
 --invalid-hereafter "$((NOW+9*HOUR))" \
 --out-file tx2.marlowe \
@@ -359,7 +357,9 @@ cardano-cli query utxo \
 
 # Contract adresss
 cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
+```
 
+```bash
 # --tx-in-marlowe TX_CONTRACT
 # --tx-in-collateral TX_PARTY_1_ADA
 # --tx-in TX_PARTY_1_ADA
@@ -378,7 +378,9 @@ marlowe-cli run execute \
 --out-file /dev/null \
 --print-stats \
 --submit 600
+```
 
+```bash
 jq '.contract' tx2.marlowe | yq -y
 cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
 ```
@@ -390,7 +392,7 @@ marlowe-cli run prepare \
 --marlowe-file tx2.marlowe \
 --deposit-account "Role=$PARTY_2" \
 --deposit-party "Role=$PARTY_2" \
---deposit-amount "$PARTY_1_AMOUNT" \
+--deposit-amount "$PARTY_2_AMOUNT" \
 --invalid-before "$NOW" \
 --invalid-hereafter "$((NOW+9*HOUR))" \
 --out-file tx3.marlowe \
@@ -409,7 +411,9 @@ cardano-cli query utxo \
 
 # Contract address
 cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
+```
 
+```bash
 # --tx-in-marlowe TX_CONTRACT
 # --tx-in-collateral TX_PARTY_2_ADA
 # --tx-in TX_PARTY_2_ADA
@@ -428,7 +432,9 @@ marlowe-cli run execute \
 --out-file /dev/null \
 --print-stats \
 --submit 600
+```
 
+```bash
 jq '.contract' tx2.marlowe | yq -y
 cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
 ```
@@ -440,15 +446,15 @@ Datum size: 23
 Payment 1
   Acccount: "Party1"
   Payee: Party "Party2"
-  Ada: 200.000000
+  Ada: 100.000000
 Payment 2
   Acccount: "Party2"
   Payee: Party "Party1"
-  Ada: 100.000000
+  Ada: 200.000000
 Payment 3
   Acccount: "Party1"
   Payee: Party "Party1"
-  Ada: 3.000000
+  Ada: 2.000000
 ```
 
 ---
