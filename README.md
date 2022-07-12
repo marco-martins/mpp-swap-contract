@@ -28,7 +28,7 @@ allow-import-from-derivation = true
 sudo systemctl restart nix-daemon.service
 ```
 
-Download Marlowe Cardano
+##### Download Marlowe Cardano
 
 ```bash
 git clone https://github.com/input-output-hk/marlowe-cardano.git
@@ -39,7 +39,7 @@ start-marlowe-run # wait a couple of minutes for the node fully sync
 # To exit from the TMUX session press "ctrl+b d"
 ```
 
-Setup envs
+##### Setup envs
 
 ```bash
 # sudo find / -name '*node.socket'
@@ -140,9 +140,9 @@ cardano-cli query utxo \
 # Output
                            TxHash                                 TxIx        Amount
 --------------------------------------------------------------------------------------
-783f1519711aa9b810e1e4bf59dc06910fb02b061ab440ab8e18c537187859dd     0        2479823763 lovelace + TxOutDatumNone
-783f1519711aa9b810e1e4bf59dc06910fb02b061ab440ab8e18c537187859dd     1        10000000 lovelace + 1 bd51f70a9afaf4e22cee3fda9dbcc68a0018382e4142efeda153cad8.506172747931 + TxOutDatumNone
-783f1519711aa9b810e1e4bf59dc06910fb02b061ab440ab8e18c537187859dd     2        10000000 lovelace + 1 bd51f70a9afaf4e22cee3fda9dbcc68a0018382e4142efeda153cad8.506172747932 + TxOutDatumNone
+b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2     0        1979823763 lovelace + TxOutDatumNone
+b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2     1        10000000 lovelace + 1 e6ab256a5a428c4427299149fa3ea6e055a966f7ddba7f8033841c3f.506172747931 + TxOutDatumNone
+b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2     2        10000000 lovelace + 1 e6ab256a5a428c4427299149fa3ea6e055a966f7ddba7f8033841c3f.506172747932 + TxOutDatumNone
 
 # The TxIx 0 is where we have our remaining ADA
 # The TxIn 1 is where we have the Party1 role token
@@ -160,9 +160,9 @@ Let's send to the Party 2 the role token and also 1000 ADA `wallet2`.
 
 marlowe-cli transaction simple \
 --required-signer ~/marlowe-cardano/wallets/wallet1/payment.skey \
---tx-in "783f1519711aa9b810e1e4bf59dc06910fb02b061ab440ab8e18c537187859dd#0" \
---tx-in "783f1519711aa9b810e1e4bf59dc06910fb02b061ab440ab8e18c537187859dd#1" \
---tx-in "783f1519711aa9b810e1e4bf59dc06910fb02b061ab440ab8e18c537187859dd#2" \
+--tx-in b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2#0 \
+--tx-in b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2#1 \
+--tx-in b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2#2 \
 --change-address $(cat ~/marlowe-cardano/wallets/wallet1/payment.addr) \
 --tx-out "$(cat ~/marlowe-cardano/wallets/wallet1/payment.addr)+$MINIMUM_ADA+1 $ROLES_CURRENCY.$PARTY_1" \
 --tx-out "$(cat ~/marlowe-cardano/wallets/wallet2/payment.addr)+$MINIMUM_ADA+1 $ROLES_CURRENCY.$PARTY_2" \
@@ -314,7 +314,7 @@ cardano-cli query utxo \
 
 marlowe-cli run execute \
 --testnet-magic $CARDANO_TESTNET_MAGIC \
---tx-in "4582be776bd1e71dc005cec94a5c53fd35dcf8a5c00be0e396d3097c594effba#0" \
+--tx-in "cc4dd70bc593b3584fa2e60bcd5d5025d9d7888734568864822a6d918d39c513#0" \
 --change-address "$(cat ~/marlowe-cardano/wallets/wallet1/payment.addr)" \
 --required-signer ~/marlowe-cardano/wallets/wallet1/payment.skey \
 --marlowe-out-file tx1.marlowe \
@@ -367,10 +367,10 @@ cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TE
 
 marlowe-cli run execute \
 --marlowe-in-file tx1.marlowe \
---tx-in-marlowe "fed17d18442a21ff206cc3ea47ad89288f0be78a485e4b070ad68bee91500818#1" \
---tx-in-collateral "fed17d18442a21ff206cc3ea47ad89288f0be78a485e4b070ad68bee91500818#0" \
---tx-in "fed17d18442a21ff206cc3ea47ad89288f0be78a485e4b070ad68bee91500818#0" \
---tx-in "4582be776bd1e71dc005cec94a5c53fd35dcf8a5c00be0e396d3097c594effba#1" \
+--tx-in-marlowe 59fd8c323155f0e6c2c7a0b679722b659c1d0d493c1d590f09f03c3561443dcf#1 \
+--tx-in-collateral 59fd8c323155f0e6c2c7a0b679722b659c1d0d493c1d590f09f03c3561443dcf#0 \
+--tx-in 59fd8c323155f0e6c2c7a0b679722b659c1d0d493c1d590f09f03c3561443dcf#0 \
+--tx-in cc4dd70bc593b3584fa2e60bcd5d5025d9d7888734568864822a6d918d39c513#1 \
 --required-signer ~/marlowe-cardano/wallets/wallet1/payment.skey \
 --marlowe-out-file tx2.marlowe \
 --tx-out "$(cat ~/marlowe-cardano/wallets/wallet1/payment.addr)+$MINIMUM_ADA+1 $ROLES_CURRENCY.$PARTY_1" \
@@ -398,6 +398,20 @@ marlowe-cli run prepare \
 --out-file tx3.marlowe \
 --print-stats
 
+# Datum size: 23
+# Payment 1
+#   Acccount: "Party1"
+#   Payee: Party "Party2"
+#   Ada: 100.000000
+# Payment 2
+#   Acccount: "Party2"
+#   Payee: Party "Party1"
+#   Ada: 200.000000
+# Payment 3
+#   Acccount: "Party1"
+#   Payee: Party "Party1"
+#   Ada: 2.000000
+
 jq '.contract' tx3.marlowe | yq -y
 ```
 
@@ -421,10 +435,10 @@ cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TE
 
 marlowe-cli run execute \
 --marlowe-in-file tx2.marlowe \
---tx-in-marlowe "01c06c06dd7a7838b20fcaea7379f4040e0a989b581a2b8cf50e20b36e72e62c#1" \
---tx-in-collateral "4582be776bd1e71dc005cec94a5c53fd35dcf8a5c00be0e396d3097c594effba#1" \
---tx-in "4582be776bd1e71dc005cec94a5c53fd35dcf8a5c00be0e396d3097c594effba#1" \
---tx-in "f068cd3a35d627cd5b84b4c3e7d42ceb4b4bc2e08b92c458a2fddf2625ac77d0#1" \
+--tx-in-marlowe bca133ed3e4e39601481cfafde4d46a499eb47010a3c07cff779e7365f297990#1 \
+--tx-in-collateral cc4dd70bc593b3584fa2e60bcd5d5025d9d7888734568864822a6d918d39c513#3 \
+--tx-in cc4dd70bc593b3584fa2e60bcd5d5025d9d7888734568864822a6d918d39c513#3 \
+--tx-in cc4dd70bc593b3584fa2e60bcd5d5025d9d7888734568864822a6d918d39c513#2 \
 --required-signer ~/marlowe-cardano/wallets/wallet2/payment.skey \
 --marlowe-out-file tx3.marlowe \
 --tx-out "$(cat ~/marlowe-cardano/wallets/wallet2/payment.addr)+$MINIMUM_ADA+1 $ROLES_CURRENCY.$PARTY_2" \
@@ -439,23 +453,112 @@ jq '.contract' tx2.marlowe | yq -y
 cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
 ```
 
-##### Contract ends
+**_*Note*_** the contract ends, but the parties need to withdraw their funds.
+
+##### Party 1 withdraw their funds from the payout script address
 
 ```bash
-Datum size: 23
-Payment 1
-  Acccount: "Party1"
-  Payee: Party "Party2"
-  Ada: 100.000000
-Payment 2
-  Acccount: "Party2"
-  Payee: Party "Party1"
-  Ada: 200.000000
-Payment 3
-  Acccount: "Party1"
-  Payee: Party "Party1"
-  Ada: 2.000000
+# Party 1 address
+cardano-cli query utxo \
+--address $(cat ~/marlowe-cardano/wallets/wallet1/payment.addr) \
+--testnet-magic $CARDANO_TESTNET_MAGIC
+
+# Contract payout address
+ROLE_ADDRESS=$(jq -r '.rolesValidator.address' tx1.marlowe)
+echo $ROLE_ADDRESS
+cardano-cli query utxo --address "$ROLE_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
 ```
+
+```bash
+# --tx-in TX_PARTY_1_ADA
+# --tx-in-collateral TX_PARTY_1_ADA
+# --tx-in TX_PARTY_1_TOKEN
+
+marlowe-cli run withdraw \
+--marlowe-file tx3.marlowe \
+--role-name $PARTY_1 \
+--tx-in bca133ed3e4e39601481cfafde4d46a499eb47010a3c07cff779e7365f297990#0 \
+--tx-in-collateral bca133ed3e4e39601481cfafde4d46a499eb47010a3c07cff779e7365f297990#0 \
+--tx-in bca133ed3e4e39601481cfafde4d46a499eb47010a3c07cff779e7365f297990#2 \
+--required-signer ~/marlowe-cardano/wallets/wallet1/payment.skey \
+--tx-out "$(cat ~/marlowe-cardano/wallets/wallet1/payment.addr)+$MINIMUM_ADA+1 $ROLES_CURRENCY.$PARTY_1" \
+--change-address "$(cat ~/marlowe-cardano/wallets/wallet1/payment.addr)" \
+--out-file /dev/null \
+--print-stats \
+--submit 600
+```
+
+```bash
+cardano-cli query utxo \
+--address $(cat ~/marlowe-cardano/wallets/wallet1/payment.addr) \
+--testnet-magic $CARDANO_TESTNET_MAGIC
+```
+
+**_Note_** the PARTY_1 also received 2 ADA, it's the value of the initial deposit to initialize the contract.
+
+##### Party 2 withdraw their funds from the payout script address
+
+```bash
+# Party 2 address
+cardano-cli query utxo \
+--address $(cat ~/marlowe-cardano/wallets/wallet2/payment.addr) \
+--testnet-magic $CARDANO_TESTNET_MAGIC
+
+# Contract payout address
+cardano-cli query utxo --address "$ROLE_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
+```
+
+```bash
+# --tx-in TX_PARTY_2_ADA
+# --tx-in-collateral TX_PARTY_2_ADA
+# --tx-in TX_PARTY_2_TOKEN
+
+marlowe-cli run withdraw \
+--marlowe-file tx3.marlowe \
+--role-name $PARTY_2 \
+--tx-in cfee29d8b65d6b3ef9b4f4495cdc68756d36606ca77c46afc6d6e295152a965b#0 \
+--tx-in-collateral cfee29d8b65d6b3ef9b4f4495cdc68756d36606ca77c46afc6d6e295152a965b#0 \
+--tx-in cfee29d8b65d6b3ef9b4f4495cdc68756d36606ca77c46afc6d6e295152a965b#3 \
+--required-signer ~/marlowe-cardano/wallets/wallet2/payment.skey \
+--tx-out "$(cat ~/marlowe-cardano/wallets/wallet2/payment.addr)+$MINIMUM_ADA+1 $ROLES_CURRENCY.$PARTY_2" \
+--change-address "$(cat ~/marlowe-cardano/wallets/wallet2/payment.addr)" \
+--out-file /dev/null \
+--print-stats \
+--submit 600
+
+```
+
+```bash
+cardano-cli query utxo \
+--address $(cat ~/marlowe-cardano/wallets/wallet2/payment.addr) \
+--testnet-magic $CARDANO_TESTNET_MAGIC
+```
+
+```bash
+cardano-cli query utxo --address "$ROLE_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
+```
+
+##### Final balances
+
+```bash
+# Contract address
+cardano-cli query utxo --address "$CONTRACT_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
+
+# Contract payout address
+cardano-cli query utxo --address "$ROLE_ADDRESS" --testnet-magic $CARDANO_TESTNET_MAGIC
+
+# Wallet 1
+cardano-cli query utxo \
+--address $(cat ~/marlowe-cardano/wallets/wallet1/payment.addr) \
+--testnet-magic $CARDANO_TESTNET_MAGIC
+
+# Wallet 2
+cardano-cli query utxo \
+--address $(cat ~/marlowe-cardano/wallets/wallet2/payment.addr) \
+--testnet-magic $CARDANO_TESTNET_MAGIC
+```
+
+**_Note_** the contract payout address is now empty.
 
 ---
 
