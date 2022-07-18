@@ -149,7 +149,7 @@ b437bd3fb73ffe4c87ec0ecdd73d5adb3fcbb8df6933d63d5a661e695436fed2     2        10
 # The TxIn 2 is where we have the Party2 role token
 ```
 
-**_*Note*_** To make the next transactions we need the make reference to this `TxHash` and `TxIx`.
+**_*Note*_** To make the next transactions we need to make reference to this `TxHash` and `TxIx`.
 
 ##### Send funds to the second wallet
 
